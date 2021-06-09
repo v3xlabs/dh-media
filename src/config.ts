@@ -1,66 +1,59 @@
-
-const os = require('os');
-
-module.exports = Object.freeze({
-  numWorkers: Object.keys(os.cpus()).length,
-  worker: {
-    logLevel: 'debug',
-    logTags: [
-      'rtp',
-      'srtp',
-      'rtcp',
-    ],
-    rtcMinPort: 40000,
-    rtcMaxPort: 49999
-  },
-  router: {
-    mediaCodecs: [
-      {
-        kind: 'audio',
-        mimeType: 'audio/opus',
-        clockRate: 48000,
-        channels: 2
+import {
+    RtpCodecCapability,
+    TransportListenIp,
+    WorkerLogTag,
+  } from "mediasoup/lib/types";
+  
+  export const config = {
+    // http server ip, port, and peer timeout constant
+    //
+    httpIp: "0.0.0.0",
+    httpPort: 3000,
+    httpPeerStale: 360000,
+  
+    mediasoup: {
+      worker: {
+        rtcMinPort: 40000,
+        rtcMaxPort: 49999,
+        logLevel: "debug",
+        logTags: [
+          "info",
+          "ice",
+          "dtls",
+          "rtp",
+          "srtp",
+          "rtcp",
+          // 'rtx',
+          // 'bwe',
+          // 'score',
+          // 'simulcast',
+          // 'svc'
+        ] as WorkerLogTag[],
       },
-      {
-        kind: 'video',
-        mimeType: 'video/VP8',
-        clockRate: 90000,
-        parameters: {
-          'x-google-start-bitrate': 1000
-        }
+      router: {
+        mediaCodecs: [
+          {
+            kind: "audio",
+            mimeType: "audio/opus",
+            clockRate: 48000,
+            channels: 2,
+          },
+        ] as RtpCodecCapability[],
       },
-      {
-        kind: 'video',
-        mimeType: 'video/VP9',
-        clockRate: 90000,
-        parameters: {
-          'profile-id': 2,
-          'x-google-start-bitrate': 1000
-        }
+  
+      // rtp listenIps are the most important thing, below. you'll need
+      // to set these appropriately for your network for the demo to
+      // run anywhere but on localhost
+      webRtcTransport: {
+        listenIps: [
+          {
+            ip: process.env.WEBRTC_LISTEN_IP || "192.168.1.165",
+            announcedIp: process.env.A_IP || undefined,
+          },
+          // { ip: "192.168.42.68", announcedIp: null },
+          // { ip: '10.10.23.101', announcedIp: null },
+        ] as TransportListenIp[],
+        initialAvailableOutgoingBitrate: 800000,
       },
-      {
-        kind: 'video',
-        mimeType: 'video/H264',
-        clockRate: 90000,
-        parameters: {
-          'packetization-mode': 1,
-          'profile-level-id': '4d0032',
-          'level-asymmetry-allowed': 1,
-          'x-google-start-bitrate': 1000
-        }
-      },
-    ]
-  },
-  webRtcTransport: {
-    listenIps: [ { ip: '0.0.0.0', announcedIp: undefined } ], // TODO: Change announcedIp to your external IP or domain name
-    enableUdp: true,
-    enableTcp: true,
-    preferUdp: true,
-    maxIncomingBitrate: 1500000
-  },
-  plainRtpTransport: {
-    listenIp: { ip: '0.0.0.0', announcedIp: undefined }, // TODO: Change announcedIp to your external IP or domain name
-    rtcpMux: true,
-    comedia: false
-  }
-});
+    },
+  } as const;
