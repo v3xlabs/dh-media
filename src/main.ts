@@ -13,7 +13,7 @@ class main {
     
     workerIdx = 0;
 
-    constructor()
+    init()
     {
         try 
         {
